@@ -79,46 +79,47 @@ components:
       type: object
       properties:
         date:
-          type: date
+          type: string
+          format: date-time
         user_id:
-          type: int
+          type: integer
         email_sent:
           type: boolean
         restaurant:
           type: object
           properties:
-          id:
-            type: integer
-            description: Unique identifier
-            readOnly: true
-            example: 123
-          name:
-            maxLength: 100
-            minLength: 1
-            type: string
-            description: Restaurant's name
-            example: "My Pizza Restaurant"
-          avg_stars:
-            type: number
-            description: Average ratings of the review associated to the restaurant
-            example: 3.4
-          num_reviews:
-            type: integer
-            description: Number of reviews associated to the restaurant
-            example: 33
-          lat:
-            type: number
-            description: Restaurant Latitude
-            example: 42.42
-          lon:
-            type: number
-            description: Restaurant Longitude
-            example: 42.42
-          phone:
-            type: string
-            minLength: 5
-            maxLength: 50
-            description: Restaurant Phone Number
-            example: "050123456"
+            id:
+              type: integer
+              description: Unique identifier
+              readOnly: true
+              example: 123
+            name:
+              maxLength: 100
+              minLength: 1
+              type: string
+              description: Restaurant's name
+              example: "My Pizza Restaurant"
+            avg_stars:
+              type: number
+              description: Average ratings of the review associated to the restaurant
+              example: 3.4
+            num_reviews:
+              type: integer
+              description: Number of reviews associated to the restaurant
+              example: 33
+            lat:
+              type: number
+              description: Restaurant Latitude
+              example: 42.42
+            lon:
+              type: number
+              description: Restaurant Longitude
+              example: 42.42
+            phone:
+              type: string
+              minLength: 5
+              maxLength: 50
+              description: Restaurant Phone Number
+              example: "050123456"
        
   
