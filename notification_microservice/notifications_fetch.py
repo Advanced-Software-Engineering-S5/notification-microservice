@@ -1,58 +1,79 @@
 from datetime import datetime, timedelta
-from database import Notification, Restaurant, User, db
-from flask import Flask
+from notification_microservice.database import Notification, Restaurant, User, db
 from sqlalchemy import desc, distinct
+from flask import request
+import requests
+import os
 
-def fetch_user_notifications(app: Flask, user_id: int, unread_only=False):
+empty_restaurant_response = {
+    "avg_stars": 0.,
+    "avg_stay_time": "-",
+    "id": -1,
+    "lat": 0.0,
+    "lon": 0.0,
+    "name": "-",
+    "num_reviews": 0,
+    "phone": "-"
+}
+def fetch_user_notifications(user_id: int):
     """Retrieve 'positive case contact' notifications of user identified by `user_id`.
     Args:
-        app (Flask): flask app.
         user_id (int): identifier of user requesting notifications.
         unread_only (bool, optional): Whether to retrieve unread notifications only. Defaults to False.
     """
-    with app.app_context():
+    unread_only = request.args.get('unread_only', False)
+    try:
         query = Notification.query.filter_by(user_id=user_id, user_notification=True)
-        # get restaurant too
         if unread_only:
             query = query.filter_by(notification_checked=False)
+        notifications = query.order_by(desc(Notification.date)).all()
+    except:
+        return 500, {'message': 'Error accessing database'}
 
-        query = query.join(Restaurant).with_entities(Notification, Restaurant)
+    # join notifications results with corresponding restaurants by querying restaurant microservice
+    try:
+        response = requests.post(f'{os.environ.get("GOS_RESTAURANT")}/restaurants/', 
+            json={'restaurant_ids': [n.restaurant_id for n in notifications]})
+        # handle failed response by providing notification information only
+        restaurants = [] if response.status_code != 200 else response.json()['restaurants']
+        # use dict for faster lookups
+        restaurants = {r['id']: r for r in restaurants}
+    except:
+        restaurants = {}
 
-        query = query.order_by(desc(Notification.date))
-        
-        return query.all()
+    # query = query.join(Restaurant).with_entities(Notification, Restaurant)
+    # format response
+    notifs_with_rests = []
+    for notif in notifications:
+        n = notif.to_dict_with_keys(['id', 'date', 'notification_checked', 'user_id', 'restaurant_id'])
+        n['restaurant'] = restaurants.get(n['restaurant_id'], empty_restaurant_response)
+        notifs_with_rests.append(n)
+    return {'notifications': notifs_with_rests}
 
-def fetch_operator_notifications(app:Flask, rest_id: int, unread_only=False):
-    # get notifications belonging to a certain restaurant
-    with app.app_context():
-        # query = Reservation.query.join(Notification)\
-        query = Notification.query.filter_by(restaurant_id=rest_id, user_notification=False)
+def fetch_operator_notifications(restaurant_id: int):
+    """ Get notifications belonging to a certain restaurant/operator.
+
+    Args:
+        rest_id (int): id of the restaurant of which we want to see notifications of.
+        unread_only (bool, optional): Whether to retrieve unread notifications only. Defaults to False.
+    Returns:
+        [type]: [description]
+    """
+    unread_only = request.args.get('unread_only', False)
+    try:
+        query = Notification.query.filter_by(restaurant_id=restaurant_id, user_notification=False)
             
         if unread_only:
             query = query.filter_by(notification_checked=False)
 
         # query = query.with_entities(Reservation, Notification)
         query = query.order_by(desc(Notification.date))
+        notifs = [q.to_dict_with_keys(['id', 'date', 'notification_checked', 'user_id', 'restaurant_id']) for q in query.all()]
+    except:
+        return 500, {'message': 'Error accessing database'}
 
-        # return [q.to_dict() for q in query.all()]
-        return query.all()
-
-def fetch_notifications(app: Flask, user: User, unread_only=False):
-    """Fetch notifications of operator or user alike.
-    Args:
-        app (Flask): flask app for context.
-        user_id ([type]): id of the user to retrieve notifications of.
-    """
-    if hasattr(user, 'restaurant_id') and not user.restaurant_id is None:
-        return fetch_operator_notifications(app, user.restaurant_id, unread_only)
-    else:
-        user_not = fetch_user_notifications(app, user.id, unread_only)
-        # add restaurant info
-        notifications = []
-        for notif, restaurant in user_not:
-            notif.restaurant = restaurant
-            notifications.append(notif)
-        return notifications
+    # operator doesn't need info about their restaurant
+    return 200, {'notifications': notifs}
 
 def getAndSetNotification(notification_id: int):
     """ Fetch specific notification by id and sets its state to
@@ -63,10 +84,29 @@ def getAndSetNotification(notification_id: int):
     Returns:
         [type]: Notification object requested.
     """
-    notification = Notification.query.filter_by(id=notification_id).join(Restaurant).with_entities(Notification, Restaurant).first()
-    if notification[0].notification_checked == False:
-        notification[0].notification_checked = True
-        db.session.commit()
-    notif = notification[0]
-    notif.restaurant = notification[1]
-    return notif
+    try:
+        notification = Notification.query.filter_by(id=notification_id).first()
+    except:
+        return 500, {'message': 'Error accessing database'}
+    if notification is None:
+        return 404, {'message': 'Requested notification does not exist'}
+
+    # get restaurant information too if service is available
+    try:
+        response = requests.post(f'{os.environ.get("GOS_RESTAURANT")}/restaurants/{notification.restaurant_id}')
+        # handle failed response by providing notification information only
+        restaurant = empty_restaurant_response if response.status_code != 200 else response.json()
+    except:
+        restaurant = empty_restaurant_response
+
+    notif = notification.to_dict_with_keys(['id', 'date', 'notification_checked', 'user_id', 'restaurant_id'])
+    if notification.notification_checked == False:
+        notification.notification_checked = True
+        notif['notification_checked'] = True
+        try:
+            db.session.commit()
+        except:
+            return 500, {'message': 'Error accessing database'}
+
+    notif['restaurant'] = restaurant
+    return 200, notification

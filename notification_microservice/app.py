@@ -1,5 +1,6 @@
 # from database import Restaurant
-import connexion, logging
+import connexion
+import logging
 from database import db
 
 db_session = None

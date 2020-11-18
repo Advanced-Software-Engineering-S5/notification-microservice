@@ -120,6 +120,16 @@ class Notification(db.Model):
 
     def to_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
+    
+    def to_dict_with_keys(self, keys):
+        notif = {}
+        for column in keys:
+            val = getattr(self, column)
+            if isinstance(val, datetime):
+                val = str(val.isoformat())
+            notif[column] = val
+            
+        return notif
 
 
 class ReservationState(enum.IntEnum):

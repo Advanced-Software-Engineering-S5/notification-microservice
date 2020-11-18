@@ -6,12 +6,12 @@ info:
 servers:
 - url: /
 paths:
-  /notifications/{user_id}:
+  /notifications/user/{user_id}:
     get:
       tags:
-      - Notifications
-      summary: Get all notifications of the user specified by user_id. If the specified user is an operator, retrieves all notifications involving the restaurant.
-      operationId: app.get_notifications
+      - User Notifications
+      summary: Get all notifications of the user specified by user_id.
+      operationId: notifications_fetch.fetch_user_notifications
       parameters:
       - name: user_id
         in: path
@@ -39,23 +39,46 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Notification'
-        404:
-          description: User does not exist
-          content: {}
-  /notifications/{user_id}/{notification_id}:
+  /notifications/restaurant/{restaurant_id}:
     get:
       tags:
-      - Notification
-      summary: Get notification specified by the id `notification_id` beloging to user `user_id`
-      operationId: app.get_notification
+      - Restaurant Notifications
+      summary: Retrieves all notifications involving the restaurant specified by restaurant_id.
+      operationId: notifications_fetch.fetch_operator_notifications
       parameters:
-      - name: user_id
+      - name: restaurant_id
         in: path
-        description: User's Unique identifier
+        description: Restaurant's Unique identifier
         required: true
         schema:
           pattern: ^[a-zA-Z0-9-]+$
           type: string
+      - name: unread_only
+        in: query
+        description: Whether to retrieve only unread notifications or not.
+        required: false
+        schema:
+          default: false
+          type: boolean
+      responses:
+        200:
+          description: Returns the array of notifications objects.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  notifications:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Notification'
+  /notifications/{notification_id}:
+    get:
+      tags:
+      - Notification
+      summary: Get notification specified by the id `notification_id`.
+      operationId: notifications_fetch.getAndSetNotification
+      parameters:
       - name: notification_id
         in: path
         description: Notification's Unique identifier
@@ -65,26 +88,30 @@ paths:
           type: string
       responses:
         200:
-          description: Returns the notification with id=notification_id
+          description: Returns the notification with id=notification_id and marks the notification as `read`.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Notification'
         404:
-          description: User or Notification does not exist
+          description: Requested notification does not exist.
           content: {}
 components:
   schemas:
     Notification:
       type: object
       properties:
+        id:
+          type: integer
         date:
           type: string
           format: date-time
         user_id:
           type: integer
-        email_sent:
+        notification_checked:
           type: boolean
+        restaurant_id:
+          type: integer
         restaurant:
           type: object
           properties:
