@@ -1,12 +1,12 @@
 import unittest
-from database import Notification, Reservation, Restaurant, db, User
+from notification_microservice.database import Notification, Reservation, Restaurant, db, User
 import random
 from datetime import datetime, timedelta
-from notifications_tasks import check_visited_places, create_notifications, contact_tracing, contact_tracing_users
+from notification_microservice.notifications_tasks import check_visited_places, create_notifications, contact_tracing, contact_tracing_users
 # from monolith.classes.notification_retrieval import fetch_operator_notifications, fetch_user_notifications, getAndSetNotification, fetch_notifications
-from tests.utils import *
+from notification_microservice.tests.utils import *
 from celery.contrib.testing.worker import start_worker
-from background import make_celery
+from notification_microservice.background import make_celery
 
 app = create_app_for_test()
 INCUBATION_PERIOD_COVID= 14

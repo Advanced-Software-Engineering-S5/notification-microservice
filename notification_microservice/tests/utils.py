@@ -1,4 +1,4 @@
-from database import Restaurant, db, User, Reservation
+from notification_microservice.database import Restaurant, db, User, Reservation
 from datetime import datetime, timedelta, time
 import random
 from flask import Flask

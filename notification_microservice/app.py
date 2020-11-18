@@ -1,7 +1,7 @@
 # from database import Restaurant
 import connexion
 import logging
-from database import db
+from notification_microservice.database import db
 
 db_session = None
 def get_notifications(user_id):

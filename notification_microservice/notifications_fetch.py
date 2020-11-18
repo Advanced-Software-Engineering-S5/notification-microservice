@@ -28,7 +28,7 @@ def fetch_user_notifications(user_id: int):
             query = query.filter_by(notification_checked=False)
         notifications = query.order_by(desc(Notification.date)).all()
     except:
-        return 500, {'message': 'Error accessing database'}
+        return {'message': 'Error accessing database'}, 500
 
     # join notifications results with corresponding restaurants by querying restaurant microservice
     try:
@@ -70,10 +70,10 @@ def fetch_operator_notifications(restaurant_id: int):
         query = query.order_by(desc(Notification.date))
         notifs = [q.to_dict_with_keys(['id', 'date', 'notification_checked', 'user_id', 'restaurant_id']) for q in query.all()]
     except:
-        return 500, {'message': 'Error accessing database'}
+        return {'message': 'Error accessing database'}, 500
 
     # operator doesn't need info about their restaurant
-    return 200, {'notifications': notifs}
+    return {'notifications': notifs}
 
 def getAndSetNotification(notification_id: int):
     """ Fetch specific notification by id and sets its state to
@@ -87,13 +87,14 @@ def getAndSetNotification(notification_id: int):
     try:
         notification = Notification.query.filter_by(id=notification_id).first()
     except:
-        return 500, {'message': 'Error accessing database'}
+        return {'message': 'Error accessing database'}, 500
     if notification is None:
-        return 404, {'message': 'Requested notification does not exist'}
+        return {'message': 'Requested notification does not exist'}, 404
 
     # get restaurant information too if service is available
     try:
         response = requests.post(f'{os.environ.get("GOS_RESTAURANT")}/restaurants/{notification.restaurant_id}')
+        print("REST RESP", response)
         # handle failed response by providing notification information only
         restaurant = empty_restaurant_response if response.status_code != 200 else response.json()
     except:
@@ -106,7 +107,7 @@ def getAndSetNotification(notification_id: int):
         try:
             db.session.commit()
         except:
-            return 500, {'message': 'Error accessing database'}
+            return {'message': 'Error accessing database'}, 500
 
     notif['restaurant'] = restaurant
-    return 200, notification
+    return notif

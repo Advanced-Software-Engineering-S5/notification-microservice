@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from app import create_app
+from notification_microservice.app import create_app
 from celery import Celery
 
 BACKEND = BROKER = 'redis://localhost:6379'
