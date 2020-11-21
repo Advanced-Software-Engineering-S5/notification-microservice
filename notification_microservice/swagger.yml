@@ -11,7 +11,7 @@ paths:
       tags:
       - User Notifications
       summary: Get all notifications of the user specified by user_id.
-      operationId: notification_microservice.notifications_fetch.fetch_user_notifications
+      operationId: notification_microservice.classes.notifications_fetch.fetch_user_notifications
       parameters:
       - name: user_id
         in: path
@@ -44,7 +44,7 @@ paths:
       tags:
       - Restaurant Notifications
       summary: Retrieves all notifications involving the restaurant specified by restaurant_id.
-      operationId: notification_microservice.notifications_fetch.fetch_operator_notifications
+      operationId: notification_microservice.classes.notifications_fetch.fetch_operator_notifications
       parameters:
       - name: restaurant_id
         in: path
@@ -77,7 +77,7 @@ paths:
       tags:
       - Notification
       summary: Get notification specified by the id `notification_id`.
-      operationId: notification_microservice.notifications_fetch.getAndSetNotification
+      operationId: notification_microservice.classes.notifications_fetch.getAndSetNotification
       parameters:
       - name: notification_id
         in: path

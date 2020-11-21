@@ -2,7 +2,7 @@ import unittest
 from notification_microservice.database import Notification, Reservation, Restaurant, db, User
 import random
 from datetime import datetime, timedelta
-from notification_microservice.notifications_tasks import check_visited_places, create_notifications, contact_tracing, contact_tracing_users
+from notification_microservice.classes.notifications_tasks import check_visited_places, create_notifications, contact_tracing, contact_tracing_users
 # from monolith.classes.notification_retrieval import fetch_operator_notifications, fetch_user_notifications, getAndSetNotification, fetch_notifications
 from notification_microservice.tests.utils import *
 from celery.contrib.testing.worker import start_worker

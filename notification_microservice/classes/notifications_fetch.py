@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from notification_microservice.database import Notification, Restaurant, User, db
+from notification_microservice.database import Notification, db
 from sqlalchemy import desc, distinct
 from flask import request
 import requests
@@ -32,7 +32,7 @@ def fetch_user_notifications(user_id: int):
 
     # join notifications results with corresponding restaurants by querying restaurant microservice
     try:
-        response = requests.post(f'{os.environ.get("GOS_RESTAURANT")}/restaurants/', 
+        response = requests.post(f'http://{os.environ.get("GOS_RESTAURANT")}/restaurants/', 
             json={'restaurant_ids': [n.restaurant_id for n in notifications]})
         # handle failed response by providing notification information only
         restaurants = [] if response.status_code != 200 else response.json()['restaurants']
@@ -93,7 +93,7 @@ def getAndSetNotification(notification_id: int):
 
     # get restaurant information too if service is available
     try:
-        response = requests.post(f'{os.environ.get("GOS_RESTAURANT")}/restaurants/{notification.restaurant_id}')
+        response = requests.post(f'http://{os.environ.get("GOS_RESTAURANT")}/restaurants/{notification.restaurant_id}')
         print("REST RESP", response)
         # handle failed response by providing notification information only
         restaurant = empty_restaurant_response if response.status_code != 200 else response.json()

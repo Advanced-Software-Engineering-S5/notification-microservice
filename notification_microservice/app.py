@@ -1,18 +1,9 @@
-# from database import Restaurant
 import connexion
 import logging
 from notification_microservice.database import db
 
-db_session = None
-def get_notifications(user_id):
-    return 'hi'
-
-def get_notification(user_id: int, notification_id):
-    return 'hello'
-
 logging.basicConfig(level=logging.INFO)
 def create_app(dbfile='sqlite:///notification_gooutsafe.db'):
-    # db_session = database.init_db('sqlite:///restaurant.db')
     app = connexion.App(__name__)
     app.add_api('swagger.yml')
     app = app.app
@@ -38,4 +29,4 @@ def create_app(dbfile='sqlite:///notification_gooutsafe.db'):
 
 if __name__ == '__main__':
     app = create_app()
-    app.run(port=8080)
+    app.run()
