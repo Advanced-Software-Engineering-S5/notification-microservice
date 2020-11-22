@@ -2,7 +2,7 @@ import unittest
 import random
 from notification_microservice.database import Notification, db
 from datetime import datetime
-from notification_microservice.tests.utils import add_random_restaurants, create_app_for_test
+from notification_microservice.tests.utils import create_app_for_test
 from notification_microservice.classes.notifications_fetch import *
 
 app = create_app_for_test()
