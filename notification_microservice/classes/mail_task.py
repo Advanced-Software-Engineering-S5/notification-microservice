@@ -14,7 +14,7 @@ def send_contact_notification():
         This task is triggered periodically, checks users at risk and sends them
         an email in case they haven't received one yet.
     """
-    logging.info("Mail sending")
+    logging.info("Mail sending..")
     notifications = Notification.query.filter_by(email_sent=False, user_notification=True).all()
     count = 0
     for notification in notifications:

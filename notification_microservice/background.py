@@ -7,7 +7,7 @@ def make_celery(app):
     # create celery object from single flask app configuration
     celery = Celery(__name__, backend=app.config['CELERY_RESULT_BACKEND'], 
     broker=app.config['CELERY_BROKER_URL'], 
-    include=['notification_microservice.classes.notifications_tasks']) # include list of modules to import when worker starts
+    include=['notification_microservice.classes.notifications_tasks', 'notification_microservice.classes.mail_task']) # include list of modules to import when worker starts
 
     celery.conf.update(app.config)
     # subclass celery task so that each task execution is wrapped in an app context
