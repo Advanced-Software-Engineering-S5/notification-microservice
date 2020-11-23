@@ -4,6 +4,7 @@ from notification_microservice.background import celery
 from notification_microservice.database import Notification
 import requests, os
 from notification_microservice.database import db
+from flask import request
 
 # tasks are written so that pipeline|chain async execution is easily implemented
 
@@ -23,7 +24,8 @@ def check_visited_places(userid: int, day_range: int):
     range_ = datetime.now() - timedelta(days=day_range)
     range_.replace(hour=0, minute=0, second=0, microsecond=0)
     
-    response = requests.get(f'http://{os.environ.GOS_RESERVATION}/filtered_reservations/{userid}?start_time={range_.isoformat()}')
+    response = requests.get(f'http://{os.environ.get("GOS_RESERVATION")}/filtered_reservations/{userid}?start_time={range_.isoformat()}')
+    print(response.json())
     if response.status_code != 200:
         # error in server
         return []
@@ -91,7 +93,7 @@ def contact_tracing(past_reservations, user_id: int):
     for reservation in past_reservations:
         et = reservation['entrance_time']
         if isinstance(et, str):
-            et = datetime.strptime(reservation['entrance_time'], '%Y-%m-%dT%H:%M:%S.%f')
+            et = datetime.fromisoformat(reservation['entrance_time'])
         # avg_stay_time = Restaurant.query.filter_by(id=reservation['restaurant_id']).first().avg_stay_time
         # get average staying time of the restaurant from Restaurant service and compute 'danger period'
         resp = requests.get(f"http://{os.environ.get('GOS_RESTAURANT')}/restaurants/{reservation['restaurant_id']}")
@@ -107,7 +109,7 @@ def contact_tracing(past_reservations, user_id: int):
         start_time = et - staying_interval
         end_time = et + staying_interval
         # now get reservations booked in same 'danger' period as the positive guy ones
-        response = requests.get(f'http://{os.environ.GOS_RESERVATION}/filtered_reservations/{user_id}?\
+        response = requests.get(f'http://{os.environ.get("GOS_RESERVATION")}/filtered_reservations/{user_id}?\
             restaurant_id={reservation["restaurant_id"]}&start_time={start_time.isoformat()}&end_time={end_time.isoformat()}&exclude_user_id=true')
         if response.status_code != 200:
             # error in server

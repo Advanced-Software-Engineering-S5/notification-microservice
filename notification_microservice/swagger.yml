@@ -96,6 +96,33 @@ paths:
         404:
           description: Requested notification does not exist.
           content: {}
+  /notifications/contact_tracing/{user_id}:
+      get:
+        tags:
+        - Generate notifications.
+        summary: Starts the contact tracing background task generating notifications.
+        operationId: notification_microservice.classes.start_background_task.new_positive_case
+        parameters:
+        - name: user_id
+          in: path
+          description: Unique identifier of the user marked as positive.
+          required: true
+          schema:
+            pattern: ^[a-zA-Z0-9-]+$
+            type: string
+        - name: incubation_period
+          in: query
+          description: Number of days to check for contacts between positive user and other customers. Defaults to 14.
+          required: false
+          schema:
+            type: integer
+        responses:
+          200:
+            description: Task scheduled correctly
+            content: {}
+          500:
+            description: Error scheduling task.
+            content: {}
 components:
   schemas:
     Notification:
