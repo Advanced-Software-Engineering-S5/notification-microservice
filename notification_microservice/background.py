@@ -4,6 +4,7 @@ from celery import Celery
 
 # BACKEND = BROKER = 'redis://localhost:6379'
 def make_celery(app):
+    # print('app config:', app.config)
     # create celery object from single flask app configuration
     celery = Celery(__name__, backend=app.config['CELERY_RESULT_BACKEND'], 
     broker=app.config['CELERY_BROKER_URL'], 

@@ -67,7 +67,7 @@ class TestMail(unittest.TestCase):
                              restaurant_id = 1, user_notification = True)
                 db.session.add(n)
             db.session.commit()
-
+            print('test db', db)
             send_contact_notification.delay().get()
 
             #check the notification has the field email_sent correctly set to true

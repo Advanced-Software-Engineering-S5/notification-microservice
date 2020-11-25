@@ -77,7 +77,5 @@ def send_email(to_email, bodyContent):
 @celery.on_after_finalize.connect
 def setup_periodic_tasks(sender, **kwargs):
     logging.info("Configuring crono task..")
-    # Register the unmark_all as crono task
-    # sender.add_periodic_task(60.0 * 60.0, unmark_all.s(14), name='unmark_positive')
     #Register the send_mail task
     sender.add_periodic_task(30.0, send_contact_notification.s(), name="send_emails")

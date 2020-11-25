@@ -4,19 +4,6 @@ import random
 import connexion
 import requests, os
 
-user_data = {'email':'prova@prova.com', 
-        'firstname':'Mario', 
-        'lastname':'Rossi', 
-        'dateofbirth': datetime(1960, 12, 3)}
-
-clear_password = 'pass'
-
-restaurant_data = {'name': 'Mensa martiri', 
-                    'lat': '4.12345',
-                    'lon': '5.67890',
-                    'phone': '3333333333',
-                    'extra_info': 'Rigatoni dorati h24, cucina povera'}
-
 def create_app_for_test():
     # creates app using in-memory sqlite db for testing purposes
     app = connexion.App(__name__)
@@ -28,8 +15,8 @@ def create_app_for_test():
     app.config['SECRET_KEY'] = 'ANOTHER ONE'
 
     # celery config
-    app.config['CELERY_BROKER_URL'] = 'redis://localhost:6379'
-    app.config['CELERY_RESULT_BACKEND'] = 'redis://localhost:6379'
+    app.config['CELERY_BROKER_URL'] = f"redis://{os.environ.get('GOS_REDIS')}/{os.environ.get('CELERY_DB_NUM')}"
+    app.config['CELERY_RESULT_BACKEND'] = f"redis://{os.environ.get('GOS_REDIS')}/{os.environ.get('CELERY_DB_NUM')}"
 
     db.init_app(app)
     db.create_all(app=app)
