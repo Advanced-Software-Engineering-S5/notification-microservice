@@ -63,13 +63,6 @@ def add_restaurants(n_places: int):
     return rests
     
 
-def mark_user_as_positive(user_id: int, positive_date: str):
-    # request User service to set one user as positive
-    print(f"Marking user {user_id} as positive to COVID-19")
-    resp = requests.post(f"http://{os.environ.get('GOS_USER')}/user/{user_id}/is_positive", json="true")
-    resp = requests.post(f"http://{os.environ.get('GOS_USER')}/user/{user_id}/confirmed_positive_date", json=positive_date.isoformat())
-    return user_id
-
 def add_visits_to_place(restaurant_id:int, visit_date: datetime, users_ids):
     # request Reservation service to add reservations
     visits_ids = []

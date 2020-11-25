@@ -39,6 +39,7 @@ class NotificationRetrieval(unittest.TestCase):
                 notifs.append(n)
             db.session.add_all(notifs)
             db.session.commit()
+            notifs = self.tested_app.get(f'/notifications/user/{uid}?unread_only=true').get_json()['notifications']
             notifs = self.tested_app.get(f'/notifications/user/{uid}').get_json()['notifications']
             db_notifs = [n.id for n in Notification.query.with_entities(Notification.id).all()]
             self.assertEqual(len(notifs), len(db_notifs))
@@ -57,15 +58,17 @@ class NotificationRetrieval(unittest.TestCase):
                 notifs.append(n)
             db.session.add_all(notifs)
             db.session.commit()
+            notifs = self.tested_app.get(f'/notifications/restaurant/{rid}?unread_only=true').get_json()['notifications']
             notifs = self.tested_app.get(f'/notifications/restaurant/{rid}').get_json()['notifications']
             db_notifs = [n.id for n in Notification.query.with_entities(Notification.id).all()]
             self.assertEqual(len(notifs), len(db_notifs))
             
             for notification in notifs:
                 self.assertIn(notification['id'], db_notifs)
-
         
 
-
+    def test_new_positive_case(self):
+        resp = self.tested_app.get(f'/notifications/contact_tracing/0')
+        self.assertEqual(resp.status_code, 200)
 
     
